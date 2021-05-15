@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
+from users.models import CustomUser
 User = get_user_model()
 
 
@@ -54,3 +55,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add custom claims
         token['email'] = user.email
         return token
+class UserSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'email', 'name']

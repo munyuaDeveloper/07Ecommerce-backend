@@ -21,7 +21,7 @@ SECRET_KEY = 'django-insecure--nbcntls#e4)#tjp)6ow!(qm19ncm6c*gv+(g5kj83#azy5m=+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -41,11 +41,14 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'users.serializers.UserSerializer',
+}
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
 
