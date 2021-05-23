@@ -31,17 +31,17 @@ class UserProfileView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
+        authenticated_user = request.user
         try:
-            user_profile = CustomUser.objects.select_related(User)
+            user_details = get_user_model().objects.get(id = authenticated_user.id)
+            # user_profile = CustomUser.objects.select_related(User)
+            records = UserSerializer(user_details, many=False)
             status_code = status.HTTP_200_OK
             response = {
                 'success': 'true',
                 'status code': status_code,
                 'message': 'User profile fetched successfully',
-                'data': {
-                    'name': user_profile.name,
-                    # 'email': user_profile.email,
-                    }
+                'data':records.data
                 }
 
         except Exception as e:
@@ -55,3 +55,11 @@ class UserProfileView(generics.RetrieveAPIView):
 
             print(str(e))
         return Response(response, status=status_code)
+
+
+class GetAllResellers(generics.RetrieveAPIView):
+    permission_classes = (IsAuthenticated)
+
+    # resellers = CustomUser.objects.get(User.user_type == 'Reseller')
+
+    serializer_class = UserSerializer
