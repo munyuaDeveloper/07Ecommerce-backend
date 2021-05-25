@@ -129,3 +129,4 @@ TODO
 changelog
 lease_info.json
 config.txt
+db.*
