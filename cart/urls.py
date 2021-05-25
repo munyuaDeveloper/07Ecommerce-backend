@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from restshop.api.cart.views import CartView, CartUnitView
+from cart.views import CartView, CartUnitView
 
 urlpatterns = [
     url(r'^cart/$',                          CartView.as_view(), name='cart'),
