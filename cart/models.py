@@ -1,9 +1,14 @@
 from django.db import models
-from django.db.models import Q
 from django.contrib.auth import get_user_model
 from product.models import Product
 
 User = get_user_model()
+
+CART_STATUS = [
+    ("ON_DISPLAY", "ON_DISPLAY"),
+    ("PROCESSING", "PROCESSING"),
+    ("PROCESSED", "PROCESSED"),
+]
 
 
 class ShoppingCart(models.Model):
@@ -14,6 +19,8 @@ class ShoppingCart(models.Model):
         User, verbose_name=u"user",
         on_delete=models.CASCADE, null=True)
     session_id = models.CharField(max_length=255, unique=True, null=True)
+    cart_status = models.CharField(
+        choices=CART_STATUS, max_length=30, verbose_name="Cart Status")
     date_created = models.DateTimeField(auto_now_add=True)
 
     # @property
@@ -64,7 +71,7 @@ class OrderInfo(models.Model):
         ("TRADE_FINISHED", "End of transaction"),
     )
 
-    user = models.ForeignKey(User, verbose_name="user",
+    cart = models.ForeignKey(ShoppingCart, verbose_name="cart",
                              null=True, on_delete=models.CASCADE)
     order_reference = models.CharField(
         max_length=30, null=True, blank=True, unique=True, verbose_name="order number")
@@ -84,22 +91,3 @@ class OrderInfo(models.Model):
 
     def __str__(self):
         return str(self.order_reference)
-
-
-class OrderProducts(models.Model):
-    """
-         Product details for the order
-    """
-    order = models.ForeignKey(OrderInfo, verbose_name="order information",
-                              related_name="order_item", on_delete=models.CASCADE)
-    product = models.ForeignKey(
-        Product, verbose_name="commodity", on_delete=models.CASCADE, related_name="order_product")
-    products_num = models.IntegerField(
-        default=0, verbose_name="Number of Products")
-
-    class Meta:
-        verbose_name = "Order products"
-        verbose_name_plural = verbose_name
-
-    def __str__(self):
-        return str(self.order.order_reference)

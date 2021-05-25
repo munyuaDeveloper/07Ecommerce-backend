@@ -17,7 +17,7 @@ class Product(models.Model):
         ordering = ['title']
 
     def __str__(self):
-        return self.title
+        return f"{self.id} -- {self.title}"
 
     @property
     def num_in_stock(self):
