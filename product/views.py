@@ -1,8 +1,9 @@
-from rest_framework import generics
+from rest_framework import generics, permissions
 
 from product.models import Product
-from product.serializers import ProductListSerializer
+from product.serializers import ProductListSerializer, ProductCreateSerializer
 from .models import Product
+
 
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductListSerializer
@@ -13,7 +14,6 @@ class ProductListView(generics.ListAPIView):
         q = self.request.query_params.get('q', None)
         category = self.request.query_params.get('category')
 
-
         if q is not None:
             queryset = queryset.filter(title__icontains=q)
 
@@ -21,7 +21,8 @@ class ProductListView(generics.ListAPIView):
             category = category.split(',')
 
             for cat in category:
-                queryset = queryset.filter(cat_set__name__iexact=cat).distinct()
+                queryset = queryset.filter(
+                    cat_set__name__iexact=cat).distinct()
 
         return queryset
 
@@ -29,3 +30,9 @@ class ProductListView(generics.ListAPIView):
 class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductListSerializer
+
+
+class ProductCreateView(generics.CreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductCreateSerializer
+    permission_classes = (permissions.IsAuthenticated, )

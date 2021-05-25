@@ -2,7 +2,7 @@ from category.models import Category
 from rest_framework import serializers
 
 
-class CategorySerializer(serializers.Serializer):
+class CategoryCreateSerializer(serializers.Serializer):
     name = serializers.CharField()
 
     def create(self, validated_data):
@@ -21,3 +21,10 @@ class CategorySerializer(serializers.Serializer):
             "name": name
         }
         return response
+
+
+class ListCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        fields = '__all__'

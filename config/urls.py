@@ -26,6 +26,7 @@ urlpatterns = [
     path('auth/', include('users.urls')),
     path('products/', include('product.urls')),
     path('category/', include('category.urls')),
+    path('fileupload/', include('fileupload.urls')),
     path('documentation/', schema_view),
 ]
 if settings.DEBUG:
