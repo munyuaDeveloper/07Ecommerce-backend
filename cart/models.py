@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 from product.models import Product
 
@@ -14,6 +15,15 @@ class ShoppingCart(models.Model):
         on_delete=models.CASCADE, null=True)
     session_id = models.CharField(max_length=255, unique=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
+
+    # @property
+    # def total(self):
+    #     cart = ShoppingCart.objects.filter(
+    #         Q(user=self.user) | Q(session_id=self.session_id)).first()
+    #     print(cart)
+    #     items = list(cart.cart_items.values_list("total", flat=True))
+    #     print(items)
+    #     return sum(items)
 
     def __str__(self):
         return f"{self.id}"
@@ -60,8 +70,6 @@ class OrderInfo(models.Model):
         max_length=30, null=True, blank=True, unique=True, verbose_name="order number")
     payment_status = models.CharField(
         choices=ORDER_STATUS, max_length=30, verbose_name="Order Status")
-    order_description = models.CharField(
-        max_length=200, verbose_name="Order Message")
     order_mount = models.FloatField(default=0.0, verbose_name="order amount")
 
     # User Info

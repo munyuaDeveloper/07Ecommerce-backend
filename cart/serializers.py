@@ -14,9 +14,22 @@ class CartDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = cart_models.ShoppingCartItem
-        fields = ['products_num', 'product', 'total']
+        fields = ['id', 'products_num', 'product', 'total']
 
     def get_product_details(self, obj):
         product = obj.product
         product_details = ProductListSerializer(product, many=False).data
         return product_details
+
+
+class OrderItemSerializer(serializers.Serializer):
+    product = serializers.CharField()
+    quantity = serializers.IntegerField()
+    amount = serializers.IntegerField()
+
+
+class OrderCreateSerializer(serializers.Serializer):
+    pickup_location = serializers.CharField()
+    phone_number = serializers.CharField()
+    email = serializers.CharField()
+    items = OrderItemSerializer(many=True)
