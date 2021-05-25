@@ -48,14 +48,12 @@ class ProductCreateView(generics.CreateAPIView):
         serializer = self.get_serializer(data=payload)
         serializer.is_valid(raise_exception=True)
 
-        seller_email = request.user
+        user = request.user
         title = serializer.validated_data.get('title')
         desc = serializer.validated_data.get('description')
         price = serializer.validated_data.get('price')
         images = serializer.validated_data.get('images')
         category = serializer.validated_data.get('category')
-
-        seller = CustomUser.objects.get(email=seller_email)
 
         category_query = Category.objects.filter(name=category).first()
 
@@ -63,7 +61,7 @@ class ProductCreateView(generics.CreateAPIView):
             "title": title,
             "description": desc,
             "price": price,
-            "seller": seller
+            "seller": user
         }
         product_inst = Product.objects.create(**product_params)
         product_inst.category.add(category_query)
