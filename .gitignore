@@ -109,6 +109,3 @@ venv.bak/
 .mypy_cache/
 .env
 # Unwanted dirs
-
-# JSON Files
-# db.*
