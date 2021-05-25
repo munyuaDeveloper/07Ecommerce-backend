@@ -15,6 +15,9 @@ class ShoppingCart(models.Model):
     session_id = models.CharField(max_length=255, unique=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.id}"
+
 
 class ShoppingCartItem(models.Model):
     """
@@ -27,12 +30,17 @@ class ShoppingCartItem(models.Model):
     products_num = models.IntegerField(
         default=0, verbose_name="Number of Products")
 
+    @property
+    def total(self):
+        total = self.products_num * self.product.price
+        return total
+
     class Meta:
-        verbose_name = "shopping cart"
+        verbose_name = "shopping cart Items"
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return "%s(%d)".format(self.product.title)
+        return f"{self.product.title} {self.products_num}"
 
 
 class OrderInfo(models.Model):
