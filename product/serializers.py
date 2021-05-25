@@ -1,24 +1,12 @@
-import email
-from users.models import CustomUser
-import category
 from rest_framework import serializers
+import requests
 
-from product.models import Product, ProductImage
+from product.models import Product
 from category.models import Category
 
+from shared_functions import service_responses
 
-class ImageSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField('get_image_url')
-
-    class Meta:
-        model = ProductImage
-        fields = ['image']
-
-    def get_image_url(self, obj):
-        request = self.context.get('request')
-        image = obj.image.url
-        full_url = request.build_absolute_uri(image)
-        return full_url
+service_response = service_responses.ServiceResponseManager()
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -30,18 +18,18 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField('get_product_category')
-    image = serializers.SerializerMethodField('get_product_image')
+    images = serializers.SerializerMethodField('get_product_images')
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'category', 'price', 'image')
+        fields = ('id', 'title', 'description', 'category',
+                  'price', 'num_in_stock', 'images')
 
-    def get_product_image(self, obj):
-        image = obj.product_image.all()
-
-        image_details = ImageSerializer(
-            image, many=True, context=self.context).data
-        return image_details
+    def get_product_images(self, obj):
+        image = list(obj.product_image.values_list('image', flat=True))
+        images = ','.join(image)
+        image_urls = service_response.get_image_urls(images)
+        return image_urls
 
     def get_product_category(self, obj):
         category = obj.category.all()
@@ -49,43 +37,15 @@ class ProductListSerializer(serializers.ModelSerializer):
         return category_details
 
 
-class ProductImageSerializer(serializers.Serializer):
-    image = serializers.CharField()
-    is_main_image = serializers.BooleanField(default=False)
-
-
 class ProductCreateSerializer(serializers.Serializer):
     category = serializers.CharField()
     title = serializers.CharField()
     description = serializers.CharField()
     price = serializers.IntegerField()
-    images = ProductImageSerializer(many=True)
+    images = serializers.ListField(child=serializers.CharField())
 
     def validate_category(self, category):
         category_query = Category.objects.filter(name=category)
         if not category_query.exists():
             raise serializers.ValidationError("Add a valid category")
         return category
-
-    def validate(self, attrs):
-        category = attrs.get('category')
-        category_query = Category.objects.filter(name=category)
-        if not category_query.exists():
-            raise serializers.ValidationError("Add a valid category")
-        return attrs
-
-    def create(self, validated_data):
-        request = self.context['request']
-        seller_email = request.user
-        title = validated_data.get('title')
-        desc = validated_data.get('description')
-        price = validated_data.get('price')
-        seller = CustomUser.objects.get(email=seller_email)
-
-        product_params = {
-            "title": title,
-            "desc": desc,
-            "price": price,
-            "seller": seller
-        }
-        product_inst = Product.objects.get_or_create(**product_params)
