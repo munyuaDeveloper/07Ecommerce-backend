@@ -16,5 +16,12 @@ class CategoryCreateView(generics.CreateAPIView):
 
 
 class ListCategoryItemView(generics.ListAPIView):
-    queryset = Category.objects.all()
     serializer_class = ListCategoryProductSerializer
+
+    def get_queryset(self):
+        request_id = self.request.query_params.get('request_id', None)
+        if not bool(request_id):
+            return []
+
+        queryset = Category.objects.filter(id=request_id).order_by('id')
+        return queryset
