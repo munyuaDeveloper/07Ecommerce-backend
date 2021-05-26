@@ -17,7 +17,7 @@ class Product(models.Model):
         ordering = ['title']
 
     def __str__(self):
-        return self.title
+        return f"{self.id} -- {self.title}"
 
     @property
     def num_in_stock(self):
@@ -40,7 +40,7 @@ class ProductImage(models.Model):
         else:
             product_title = 'No product assigned'
 
-        return '{}: {}'.format(product_title, self.image.name)
+        return '{}: {}'.format(product_title)
 
     def delete(self, *args, **kwargs):
         self.image.delete()

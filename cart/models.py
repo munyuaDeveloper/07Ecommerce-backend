@@ -4,6 +4,12 @@ from product.models import Product
 
 User = get_user_model()
 
+CART_STATUS = [
+    ("ON_DISPLAY", "ON_DISPLAY"),
+    ("PROCESSING", "PROCESSING"),
+    ("PROCESSED", "PROCESSED"),
+]
+
 
 class ShoppingCart(models.Model):
     """
@@ -13,7 +19,21 @@ class ShoppingCart(models.Model):
         User, verbose_name=u"user",
         on_delete=models.CASCADE, null=True)
     session_id = models.CharField(max_length=255, unique=True, null=True)
+    cart_status = models.CharField(
+        choices=CART_STATUS, max_length=30, verbose_name="Cart Status")
     date_created = models.DateTimeField(auto_now_add=True)
+
+    # @property
+    # def total(self):
+    #     cart = ShoppingCart.objects.filter(
+    #         Q(user=self.user) | Q(session_id=self.session_id)).first()
+    #     print(cart)
+    #     items = list(cart.cart_items.values_list("total", flat=True))
+    #     print(items)
+    #     return sum(items)
+
+    def __str__(self):
+        return f"{self.id}"
 
 
 class ShoppingCartItem(models.Model):
@@ -27,12 +47,17 @@ class ShoppingCartItem(models.Model):
     products_num = models.IntegerField(
         default=0, verbose_name="Number of Products")
 
+    @property
+    def total(self):
+        total = self.products_num * self.product.price
+        return total
+
     class Meta:
-        verbose_name = "shopping cart"
+        verbose_name = "shopping cart Items"
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return "%s(%d)".format(self.product.title)
+        return f"{self.product.title} {self.products_num}"
 
 
 class OrderInfo(models.Model):
@@ -46,14 +71,12 @@ class OrderInfo(models.Model):
         ("TRADE_FINISHED", "End of transaction"),
     )
 
-    user = models.ForeignKey(User, verbose_name="user",
+    cart = models.ForeignKey(ShoppingCart, verbose_name="cart",
                              null=True, on_delete=models.CASCADE)
     order_reference = models.CharField(
         max_length=30, null=True, blank=True, unique=True, verbose_name="order number")
     payment_status = models.CharField(
         choices=ORDER_STATUS, max_length=30, verbose_name="Order Status")
-    order_description = models.CharField(
-        max_length=200, verbose_name="Order Message")
     order_mount = models.FloatField(default=0.0, verbose_name="order amount")
 
     # User Info
@@ -68,22 +91,3 @@ class OrderInfo(models.Model):
 
     def __str__(self):
         return str(self.order_reference)
-
-
-class OrderProducts(models.Model):
-    """
-         Product details for the order
-    """
-    order = models.ForeignKey(OrderInfo, verbose_name="order information",
-                              related_name="order_item", on_delete=models.CASCADE)
-    product = models.ForeignKey(
-        Product, verbose_name="commodity", on_delete=models.CASCADE, related_name="order_product")
-    products_num = models.IntegerField(
-        default=0, verbose_name="Number of Products")
-
-    class Meta:
-        verbose_name = "Order products"
-        verbose_name_plural = verbose_name
-
-    def __str__(self):
-        return str(self.order.order_reference)
