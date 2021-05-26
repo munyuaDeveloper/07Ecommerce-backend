@@ -40,7 +40,7 @@ class ProductImage(models.Model):
         else:
             product_title = 'No product assigned'
 
-        return '{}: {}'.format(product_title, self.image.name)
+        return '{}: {}'.format(product_title)
 
     def delete(self, *args, **kwargs):
         self.image.delete()
