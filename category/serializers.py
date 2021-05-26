@@ -1,3 +1,4 @@
+from product.serializers import ProductSerializer
 from category.models import Category
 from rest_framework import serializers
 
@@ -27,4 +28,19 @@ class ListCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'name']
+
+
+class ListCategoryProductSerializer(ListCategorySerializer):
+    products = serializers.SerializerMethodField("get_category_products")
+
+    class Meta:
+        model = Category
+        fields = ListCategorySerializer.Meta.fields + [
+            "products"
+        ]
+
+    def get_category_products(self, obj):
+        products = obj.categories.all()
+        product_details = ProductSerializer(products, many=True).data
+        return product_details

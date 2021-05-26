@@ -111,4 +111,4 @@ venv.bak/
 # Unwanted dirs
 
 # JSON Files
-# db.*
+db.*

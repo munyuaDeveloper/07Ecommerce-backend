@@ -16,20 +16,29 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['name']
 
 
-class ProductListSerializer(serializers.ModelSerializer):
-    category = serializers.SerializerMethodField('get_product_category')
+class ProductSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField('get_product_images')
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'description', 'category',
-                  'price', 'num_in_stock', 'images')
+        fields = [
+            'id', 'title', 'description',
+            'price', 'num_in_stock', 'images'
+        ]
 
     def get_product_images(self, obj):
         image = list(obj.product_image.values_list('image', flat=True))
         images = ','.join(image)
         image_urls = service_response.get_image_urls(images)
         return image_urls
+
+
+class ProductListSerializer(ProductSerializer):
+    category = serializers.SerializerMethodField('get_product_category')
+
+    class Meta:
+        model = Product
+        fields = ProductSerializer.Meta.fields + ['category']
 
     def get_product_category(self, obj):
         category = obj.category.all()
