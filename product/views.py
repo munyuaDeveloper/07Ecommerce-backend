@@ -52,6 +52,7 @@ class ProductCreateView(generics.CreateAPIView):
         title = serializer.validated_data.get('title')
         desc = serializer.validated_data.get('description')
         price = serializer.validated_data.get('price')
+        quantity = serializer.validated_data.get('quantity')
         images = serializer.validated_data.get('images')
         category = serializer.validated_data.get('category')
 
@@ -61,6 +62,7 @@ class ProductCreateView(generics.CreateAPIView):
             "title": title,
             "description": desc,
             "price": price,
+            "quantity": quantity,
             "seller": user
         }
         product_inst = Product.objects.create(**product_params)

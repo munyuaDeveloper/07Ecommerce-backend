@@ -1,5 +1,5 @@
+from users.models import CustomUser
 from rest_framework import serializers
-import requests
 
 from product.models import Product
 from category.models import Category
@@ -7,6 +7,12 @@ from category.models import Category
 from shared_functions import service_responses
 
 service_response = service_responses.ServiceResponseManager()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'name']
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -18,12 +24,14 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField('get_product_images')
+    seller = serializers.SerializerMethodField('get_product_seller')
 
     class Meta:
         model = Product
         fields = [
             'id', 'title', 'description',
-            'price', 'num_in_stock', 'images'
+            'price', 'quantity', 'images',
+            "seller"
         ]
 
     def get_product_images(self, obj):
@@ -31,6 +39,11 @@ class ProductSerializer(serializers.ModelSerializer):
         images = ','.join(image)
         image_urls = service_response.get_image_urls(images)
         return image_urls
+
+    def get_product_seller(self, obj):
+        seller = obj.seller
+        seller_details = UserSerializer(seller, many=False).data
+        return seller_details
 
 
 class ProductListSerializer(ProductSerializer):
@@ -51,6 +64,7 @@ class ProductCreateSerializer(serializers.Serializer):
     title = serializers.CharField()
     description = serializers.CharField()
     price = serializers.IntegerField()
+    quantity = serializers.IntegerField()
     images = serializers.ListField(child=serializers.CharField())
 
     def validate_category(self, category):

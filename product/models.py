@@ -11,17 +11,13 @@ class Product(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     price = models.PositiveIntegerField()
-    num_in_stock = models.PositiveIntegerField(default=5)
+    quantity = models.PositiveIntegerField(default=5)
 
     class Meta:
         ordering = ['title']
 
     def __str__(self):
         return f"{self.id} -- {self.title}"
-
-    @property
-    def num_in_stock(self):
-        return Product.objects.filter(title=self.title).all().count()
 
 
 class ProductImage(models.Model):
