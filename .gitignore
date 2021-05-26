@@ -109,3 +109,9 @@ venv.bak/
 .mypy_cache/
 .env
 # Unwanted dirs
+<<<<<<< HEAD
+=======
+
+# JSON Files
+# db.*
+>>>>>>> b676909b7e94582e76cbb0ea33173a6ba6656141
