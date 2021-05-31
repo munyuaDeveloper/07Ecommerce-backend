@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'category',
     'cart',
     'product',
-
+    'django_extensions',
     'rest_framework',
     'rest_framework_swagger'
 ]
