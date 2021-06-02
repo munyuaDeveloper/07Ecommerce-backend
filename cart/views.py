@@ -24,9 +24,10 @@ class AddToCartView(generics.CreateAPIView):
     def create(self, request):
         try:
             user = request.user
-            session_id = request.session._get_or_create_session_key()
             if user.is_anonymous:
                 user = None
+                if request.session.session_key is None:
+                    request.session.save()
         except Exception as e:
             print(e)
             pass
@@ -44,7 +45,7 @@ class AddToCartView(generics.CreateAPIView):
             })
         else:
             cart_params.update({
-                "session_id": session_id,
+                "session_id": request.session.session_key,
                 "cart_status": "ON_DISPLAY"
             })
 
@@ -76,9 +77,10 @@ class RemoveFromCartView(generics.UpdateAPIView):
     def put(self, request):
         try:
             user = request.user
-            session_id = request.session._get_or_create_session_key()
             if user.is_anonymous:
                 user = None
+                if request.session.session_key is None:
+                    request.session.save()
         except Exception as e:
             print(e)
             pass
@@ -96,7 +98,7 @@ class RemoveFromCartView(generics.UpdateAPIView):
             })
         else:
             cart_params.update({
-                "session_id": session_id,
+                "session_id": request.session.session_key,
                 "cart_status": "ON_DISPLAY"
             })
 
@@ -136,9 +138,10 @@ class DeleteCartItemView(generics.CreateAPIView):
 
         try:
             user = self.request.user
-            session_id = self.request.session._get_or_create_session_key()
             if user.is_anonymous:
                 user = None
+                if request.session.session_key is None:
+                    request.session.save()
         except Exception as e:
             print(e)
             pass
@@ -148,8 +151,8 @@ class DeleteCartItemView(generics.CreateAPIView):
             query.add(Q(cart__user=user, id=product_id,
                       cart__cart_status="ON_DISPLAY"), Q.AND)
         else:
-            query.add(Q(cart__session_id=session_id, id=product_id,
-                      cart__cart_status="ON_DISPLAY"), Q.AND)
+            query.add(Q(cart__session_id=request.session.session_key,
+                        id=product_id, cart__cart_status="ON_DISPLAY"), Q.AND)
 
         update_product = cart_models.ShoppingCartItem.objects.filter(
             query).first()
@@ -167,9 +170,10 @@ class CartView(generics.ListAPIView):
     def get_queryset(self):
         try:
             user = self.request.user
-            session_id = self.request.session._get_or_create_session_key()
             if user.is_anonymous:
                 user = None
+                if self.request.session.session_key is None:
+                    self.request.session.save()
         except Exception as e:
             print(e)
             pass
@@ -182,7 +186,7 @@ class CartView(generics.ListAPIView):
             })
         else:
             filter_params.update({
-                "session_id": session_id,
+                "session_id": self.request.session.session_key,
                 "cart_status": "ON_DISPLAY"
             })
 
@@ -251,9 +255,10 @@ class ListOrderView(generics.ListAPIView):
     def get_queryset(self):
         try:
             user = self.request.user
-            session_id = self.request.session._get_or_create_session_key()
             if user.is_anonymous:
                 user = None
+                if self.request.session.session_key is None:
+                    self.request.session.save()
         except Exception as e:
             print(e)
             pass
@@ -263,7 +268,7 @@ class ListOrderView(generics.ListAPIView):
             query.add(Q(cart__user=user,
                         cart__cart_status="PROCESSING"), Q.AND)
         else:
-            query.add(Q(cart__session_id=session_id,
+            query.add(Q(cart__session_id=self.request.session.session_key,
                       cart__cart_status="PROCESSING"), Q.AND)
 
         order_queryset = cart_models.OrderInfo.objects.filter(
@@ -283,9 +288,10 @@ class UpdateOrderView(generics.UpdateAPIView):
 
         try:
             user = self.request.user
-            session_id = self.request.session._get_or_create_session_key()
             if user.is_anonymous:
                 user = None
+                if request.session.session_key is None:
+                    request.session.save()
         except Exception as e:
             print(e)
             pass
@@ -295,8 +301,8 @@ class UpdateOrderView(generics.UpdateAPIView):
             query.add(Q(cart__user=user, id=product_id,
                       cart__cart_status="PROCESSING"), Q.AND)
         else:
-            query.add(Q(cart__session_id=session_id, id=product_id,
-                      cart__cart_status="PROCESSING"), Q.AND)
+            query.add(Q(cart__session_id=request.session.session_key,
+                        id=product_id, cart__cart_status="PROCESSING"), Q.AND)
 
         order_queryset = cart_models.OrderInfo.objects.filter(
             query).first()
