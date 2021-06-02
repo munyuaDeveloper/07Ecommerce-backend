@@ -48,9 +48,10 @@ class AddToCartView(generics.CreateAPIView):
                 "session_id": request.session.session_key,
                 "cart_status": "ON_DISPLAY"
             })
+        cart = cart_models.ShoppingCart.objects.filter(**cart_params).first()
+        if not bool(cart):
+            cart = cart_models.ShoppingCart.objects.create(**cart_params)
 
-        cart, created = cart_models.ShoppingCart.objects.get_or_create(
-            **cart_params)
         product = Product.objects.filter(id=product_id).first()
         if not product:
             return Response({"details": "Sorry. Product does not exist"})

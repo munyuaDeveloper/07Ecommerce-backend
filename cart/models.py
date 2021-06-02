@@ -18,7 +18,7 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User, verbose_name=u"user",
         on_delete=models.CASCADE, null=True)
-    session_id = models.CharField(max_length=255, unique=True, null=True)
+    session_id = models.CharField(max_length=255, null=True)
     cart_status = models.CharField(
         choices=CART_STATUS, max_length=30, verbose_name="Cart Status")
     date_created = models.DateTimeField(auto_now_add=True)
