@@ -83,6 +83,11 @@ class OrderInfo(models.Model):
     pickup_location = models.CharField(max_length=100, null=True)
     phone_number = models.CharField(max_length=15, null=True)
     email = models.CharField(max_length=255, null=True)
+    email = models.CharField(max_length=255, null=True)
+    method_of_payment = models.CharField(max_length=255, null=True)
+    card_owner = models.CharField(max_length=255, null=True)
+    card_number = models.CharField(max_length=255, null=True)
+    card_cvc = models.CharField(max_length=255, null=True)
     date_created = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:

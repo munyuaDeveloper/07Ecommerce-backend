@@ -6,11 +6,6 @@ from cart import models as cart_models
 from product.serializers import ProductListSerializer
 
 
-phone_regex = RegexValidator(
-    regex=r'^\+?254?\d{10,12}$',
-    message="Phone number must be entered in the format: '+254123456789'. Up to 12 digits allowed.")
-
-
 class GenericRequestSerializer(serializers.Serializer):
     request_id = serializers.CharField()
 
@@ -45,12 +40,34 @@ class ListCartDetailSerializer(serializers.ModelSerializer):
         return cart_details
 
 
+PAYMENT_OPTIONS = [
+    ("PAYPAL", 'PAYPAL'),
+    ("CARD", 'CARD'),
+]
+
+
 class OrderCreateSerializer(serializers.Serializer):
     cart = serializers.CharField()
     pickup_location = serializers.CharField()
-    phone_number = serializers.CharField(
-        required=True, validators=[phone_regex])
+    phone_number = serializers.CharField(required=True)
     email = serializers.EmailField()
+    method_of_payment = serializers.ChoiceField(choices=PAYMENT_OPTIONS)
+    card_owner = serializers.CharField(allow_blank=True, allow_null=True)
+    card_number = serializers.CharField(allow_blank=True, allow_null=True)
+    card_cvc = serializers.CharField(allow_blank=True, allow_null=True)
+
+    def validate(self, attrs):
+        method_of_payment = attrs['method_of_payment']
+        card_owner = attrs['card_owner']
+        card_number = attrs['card_number']
+        card_cvc = attrs['card_cvc']
+
+        if method_of_payment == 'CARD':
+            if not bool(card_owner) or not bool(card_number) or not bool(card_cvc):
+                raise serializers.ValidationError(
+                    "Please add card owner or number or cvc")
+
+        return attrs
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
@@ -66,6 +83,10 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'pickup_location',
             'phone_number',
             'email',
+            'method_of_payment',
+            'card_owner',
+            'card_number',
+            'card_cvc',
             'cart',
             'date_created',
         ]

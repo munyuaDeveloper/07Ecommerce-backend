@@ -211,6 +211,10 @@ class CreateOrderView(generics.CreateAPIView):
         phone_number = payload['phone_number']
         email = payload['email']
         cart_id = payload['cart']
+        method_of_payment = payload['method_of_payment']
+        card_owner = payload['card_owner']
+        card_number = payload['card_number']
+        card_cvc = payload['card_cvc']
 
         cart_inst = cart_models.ShoppingCart.objects.filter(
             id=cart_id, cart_status="ON_DISPLAY").first()
@@ -230,7 +234,11 @@ class CreateOrderView(generics.CreateAPIView):
             "payment_status": "WAIT_BUYER_PAY",
             "pickup_location": location,
             "phone_number": phone_number,
-            "email": email
+            "email": email,
+            "method_of_payment": method_of_payment,
+            "card_owner": card_owner,
+            "card_number": card_number,
+            "card_cvc": card_cvc,
         }
         order_inst, created = cart_models.OrderInfo.objects.get_or_create(
             **order_params)
