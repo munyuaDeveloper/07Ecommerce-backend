@@ -33,7 +33,7 @@ class UserProfileView(generics.RetrieveAPIView):
     def get(self, request):
         authenticated_user = request.user
         try:
-            user_details = get_user_model().objects.get(id = authenticated_user.id)
+            user_details = get_user_model().objects.get(id=authenticated_user.id)
             # user_profile = CustomUser.objects.select_related(User)
             records = UserSerializer(user_details, many=False)
             status_code = status.HTTP_200_OK
@@ -41,8 +41,8 @@ class UserProfileView(generics.RetrieveAPIView):
                 'success': 'true',
                 'status code': status_code,
                 'message': 'User profile fetched successfully',
-                'data':records.data
-                }
+                'data': records.data
+            }
 
         except Exception as e:
             status_code = status.HTTP_400_BAD_REQUEST
@@ -51,14 +51,14 @@ class UserProfileView(generics.RetrieveAPIView):
                 'status code': status.HTTP_400_BAD_REQUEST,
                 'message': 'User does not exists',
                 'detail': str(e)
-                }
+            }
 
             print(str(e))
         return Response(response, status=status_code)
 
 
 class GetAllResellers(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated)
+    permission_classes = (IsAuthenticated, )
 
     # resellers = CustomUser.objects.get(User.user_type == 'Reseller')
 
