@@ -63,7 +63,7 @@ class OrderCreateSerializer(serializers.Serializer):
         card_cvc = attrs['card_cvc']
 
         if method_of_payment == 'CARD':
-            if not bool(card_owner) or not bool(card_number) or not bool(card_cvc):
+            if not bool(card_owner) or not bool(card_number):
                 raise serializers.ValidationError(
                     "Please add card owner or number or cvc")
 
