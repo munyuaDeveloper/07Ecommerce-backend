@@ -1,6 +1,6 @@
 from django.contrib.sessions.models import Session
 from rest_framework import status, generics, filters
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import F, Count, Q
 
@@ -167,8 +167,11 @@ class CartView(generics.ListAPIView):
     serializer_class = ListCartDetailSerializer
     permission_classes = (AllowAny, )
     filter_backends = [filters.SearchFilter]
-    search_fields = ['product__title',
-                     'product__description', 'product__category__name']
+    search_fields = [
+        'cart_status',
+        'cart_items__product__title',
+        'cart_items__product__description',
+        'cart_items__product__category__name']
 
     def get_queryset(self):
         try:
@@ -263,8 +266,7 @@ class ListOrderView(generics.ListAPIView):
     serializer_class = OrderDetailSerializer
     permission_classes = (AllowAny, )
     filter_backends = [filters.SearchFilter]
-    search_fields = ['product__title',
-                     'product__description', 'product__category__name']
+    search_fields = ['order_reference', 'payment_status']
 
     def get_queryset(self):
         try:
@@ -277,13 +279,21 @@ class ListOrderView(generics.ListAPIView):
             print(e)
             pass
 
+        order_status = self.request.query_params.get('filter', None)
+        if not bool(order_status):
+            order_status = "PROCESSING"
+
+        allowed_status = ["PROCESSING", "PROCESSED", ]
+        if order_status.upper() not in allowed_status:
+            return []
+
         query = Q()
         if bool(user):
             query.add(Q(cart__user=user,
-                        cart__cart_status="PROCESSING"), Q.AND)
+                        cart__cart_status__iexact=order_status), Q.AND)
         else:
             query.add(Q(cart__session_id=self.request.session.session_key,
-                      cart__cart_status="PROCESSING"), Q.AND)
+                      cart__cart_status__iexact=order_status), Q.AND)
 
         order_queryset = cart_models.OrderInfo.objects.filter(
             query).order_by('-date_created')
@@ -292,36 +302,21 @@ class ListOrderView(generics.ListAPIView):
 
 class UpdateOrderView(generics.UpdateAPIView):
     serializer_class = GenericRequestSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAuthenticated, )
 
     def put(self, request):
         payload = request.data
         serializer = self.get_serializer(data=payload)
         serializer.is_valid(raise_exception=True)
         product_id = payload['request_id']
-
         try:
-            user = self.request.user
-            if user.is_anonymous:
-                user = None
-                if request.session.session_key is None:
-                    request.session.save()
+            order_queryset = cart_models.OrderInfo.objects.get(
+                id=product_id)
         except Exception as e:
-            print(e)
-            pass
-
-        query = Q()
-        if bool(user):
-            query.add(Q(cart__user=user, id=product_id,
-                      cart__cart_status="PROCESSING"), Q.AND)
-        else:
-            query.add(Q(cart__session_id=request.session.session_key,
-                        id=product_id, cart__cart_status="PROCESSING"), Q.AND)
-
-        order_queryset = cart_models.OrderInfo.objects.filter(
-            query).first()
-        if not order_queryset:
             return Response({"details": "Order does not exist"})
+
+        if order_queryset.cart.cart_status != "PROCESSING":
+            return Response({"details": "Order is already processed"})
 
         order_queryset.payment_status = "TRADE_CLOSED"
         order_queryset.save(update_fields=['payment_status'])

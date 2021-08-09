@@ -39,6 +39,7 @@ class ListCartDetailSerializer(serializers.ModelSerializer):
         cart_details = CartDetailSerializer(cart_items, many=True).data
         return cart_details
 
+
 class ListWishListDetailSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField("get_product_details")
 
@@ -84,6 +85,7 @@ class OrderCreateSerializer(serializers.Serializer):
 
 class OrderDetailSerializer(serializers.ModelSerializer):
     cart = serializers.SerializerMethodField("get_cart_details")
+    order_status = serializers.SerializerMethodField("get_order_status")
 
     class Meta:
         model = cart_models.OrderInfo
@@ -91,6 +93,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'id',
             'order_reference',
             'payment_status',
+            'order_status',
             'order_mount',
             'pickup_location',
             'phone_number',
@@ -111,4 +114,12 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         cart_details = CartDetailSerializer(items, many=True).data
         return cart_details
 
-
+    def get_order_status(self, obj):
+        cart = obj.cart
+        if not cart:
+            return []
+        order_status = cart.cart_status
+        if order_status == "PROCESSED":
+            return "COMPLETED"
+        else:
+            return "ONGOING"
