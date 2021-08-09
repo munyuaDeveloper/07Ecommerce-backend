@@ -6,8 +6,8 @@ User = get_user_model()
 
 CART_STATUS = [
     ("ON_DISPLAY", "ON_DISPLAY"),
-    ("PROCESSING", "PROCESSING"),
-    ("PROCESSED", "PROCESSED"),
+    ("ONGOING", "ONGOING"),
+    ("COMPLETE", "COMPLETE"),
 ]
 
 

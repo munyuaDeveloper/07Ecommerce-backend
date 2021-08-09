@@ -118,8 +118,4 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         cart = obj.cart
         if not cart:
             return []
-        order_status = cart.cart_status
-        if order_status == "PROCESSED":
-            return "COMPLETED"
-        else:
-            return "ONGOING"
+        return cart.cart_status

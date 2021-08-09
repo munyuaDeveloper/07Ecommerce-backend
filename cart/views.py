@@ -255,7 +255,7 @@ class CreateOrderView(generics.CreateAPIView):
         order_inst.order_reference = reference_number
         order_inst.save(update_fields=['order_mount', 'order_reference'])
 
-        cart_inst.cart_status = 'PROCESSING'
+        cart_inst.cart_status = 'ONGOING'
         cart_inst.save(update_fields=['cart_status'])
 
         order_details = OrderDetailSerializer(order_inst, many=False).data
@@ -281,9 +281,9 @@ class ListOrderView(generics.ListAPIView):
 
         order_status = self.request.query_params.get('filter', None)
         if not bool(order_status):
-            order_status = "PROCESSING"
+            order_status = "ONGOING"
 
-        allowed_status = ["PROCESSING", "PROCESSED", ]
+        allowed_status = ["ONGOING", "COMPLETE", ]
         if order_status.upper() not in allowed_status:
             return []
 
@@ -315,14 +315,14 @@ class UpdateOrderView(generics.UpdateAPIView):
         except Exception as e:
             return Response({"details": "Order does not exist"})
 
-        if order_queryset.cart.cart_status != "PROCESSING":
-            return Response({"details": "Order is already processed"})
+        if order_queryset.cart.cart_status != "ONGOING":
+            return Response({"details": "Order is already completed"})
 
         order_queryset.payment_status = "TRADE_CLOSED"
         order_queryset.save(update_fields=['payment_status'])
 
         cart = order_queryset.cart
-        cart.cart_status = "PROCESSED"
+        cart.cart_status = "COMPLETE"
         cart.save(update_fields=['cart_status'])
         return Response({"details": "successfully updated"})
 
