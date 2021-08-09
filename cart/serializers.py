@@ -39,6 +39,18 @@ class ListCartDetailSerializer(serializers.ModelSerializer):
         cart_details = CartDetailSerializer(cart_items, many=True).data
         return cart_details
 
+class ListWishListDetailSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField("get_product_details")
+
+    class Meta:
+        model = cart_models.WishList
+        fields = ['id', 'product', 'date_created']
+
+    def get_product_details(self, obj):
+        product = obj.product
+        product_details = ProductListSerializer(product, many=False).data
+        return product_details
+
 
 PAYMENT_OPTIONS = [
     ("PAYPAL", 'PAYPAL'),
@@ -98,3 +110,5 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         items = cart.cart_items.all()
         cart_details = CartDetailSerializer(items, many=True).data
         return cart_details
+
+

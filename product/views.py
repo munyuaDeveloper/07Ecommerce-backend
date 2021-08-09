@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, filters
 from rest_framework.response import Response
 
 from product.models import Product
@@ -13,24 +13,9 @@ from category.models import Category
 
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductListSerializer
-
-    def get_queryset(self):
-        queryset = Product.objects.all()
-
-        q = self.request.query_params.get('q', None)
-        category = self.request.query_params.get('category')
-
-        if q is not None:
-            queryset = queryset.filter(title__icontains=q)
-
-        if category:
-            category = category.split(',')
-
-            for cat in category:
-                queryset = queryset.filter(
-                    cat_set__name__iexact=cat).distinct()
-
-        return queryset
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title', 'description', 'category__name']
+    queryset = Product.objects.all().order_by('title')
 
 
 class ProductDetailView(generics.RetrieveAPIView):

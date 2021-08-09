@@ -96,3 +96,16 @@ class OrderInfo(models.Model):
 
     def __str__(self):
         return str(self.order_reference)
+
+
+class WishList(models.Model):
+    """
+         wish list products
+    """
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True)
+    session_id = models.CharField(max_length=255, null=True)
+    product = models.ForeignKey(
+        Product, verbose_name=u"commodity", on_delete=models.CASCADE,
+        related_name='wish_product')
+    date_created = models.DateTimeField(auto_now_add=True, null=True)

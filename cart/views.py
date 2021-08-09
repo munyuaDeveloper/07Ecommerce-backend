@@ -1,13 +1,12 @@
 from django.contrib.sessions.models import Session
-from django.db.models.query_utils import Q
-from rest_framework import status, generics
+from rest_framework import status, generics, filters
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.db.models import F, Count
+from django.db.models import F, Count, Q
 
 from cart import models as cart_models
 from cart.serializers import (
-    AddToCartSerializer, ListCartDetailSerializer,
+    AddToCartSerializer, ListCartDetailSerializer, ListWishListDetailSerializer,
     OrderCreateSerializer, OrderDetailSerializer, GenericRequestSerializer
 )
 
@@ -167,6 +166,9 @@ class DeleteCartItemView(generics.CreateAPIView):
 class CartView(generics.ListAPIView):
     serializer_class = ListCartDetailSerializer
     permission_classes = (AllowAny, )
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['product__title',
+                     'product__description', 'product__category__name']
 
     def get_queryset(self):
         try:
@@ -260,6 +262,9 @@ class CreateOrderView(generics.CreateAPIView):
 class ListOrderView(generics.ListAPIView):
     serializer_class = OrderDetailSerializer
     permission_classes = (AllowAny, )
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['product__title',
+                     'product__description', 'product__category__name']
 
     def get_queryset(self):
         try:
@@ -325,3 +330,114 @@ class UpdateOrderView(generics.UpdateAPIView):
         cart.cart_status = "PROCESSED"
         cart.save(update_fields=['cart_status'])
         return Response({"details": "successfully updated"})
+
+
+class AddToWishListView(generics.CreateAPIView):
+    queryset = cart_models.WishList.objects.all()
+    serializer_class = AddToCartSerializer
+    permission_classes = (AllowAny, )
+
+    def create(self, request):
+        try:
+            user = request.user
+            if user.is_anonymous:
+                user = None
+                if request.session.session_key is None:
+                    request.session.save()
+        except Exception as e:
+            print(e)
+            pass
+
+        payload = request.data
+        serializer = self.get_serializer(data=payload)
+        serializer.is_valid(raise_exception=True)
+        product_id = payload['product']
+
+        product = Product.objects.filter(id=product_id).first()
+        if not product:
+            return Response({"details": "Sorry. Product does not exist"})
+
+        wish_params = {
+            "product": product
+        }
+        if bool(user):
+            wish_params.update({
+                "user": user
+            })
+        else:
+            wish_params.update({
+                "session_id": request.session.session_key
+            })
+        wish_list = cart_models.WishList.objects.filter(**wish_params).first()
+        if not bool(wish_list):
+            cart = cart_models.WishList.objects.create(**wish_params)
+
+        return Response({"details": "successfully added to wish list"})
+
+
+class RemoveFromWishListView(generics.DestroyAPIView):
+    queryset = cart_models.WishList.objects.all()
+    serializer_class = GenericRequestSerializer
+    permission_classes = (AllowAny, )
+
+    def delete(self, request):
+        try:
+            user = request.user
+            if user.is_anonymous:
+                user = None
+                if request.session.session_key is None:
+                    request.session.save()
+        except Exception as e:
+            print(e)
+            pass
+
+        payload = request.data
+        serializer = self.get_serializer(data=payload)
+        serializer.is_valid(raise_exception=True)
+        wish_id = payload['request_id']
+        try:
+            wish_list = cart_models.WishList.objects.get(id=wish_id)
+        except Exception as e:
+            print(e)
+            return Response({"details": "Sorry. Wish list item does not exist"})
+
+        session_id = self.request.session.session_key,
+        if wish_list.user != user:
+            if wish_list.session_id != user:
+                return Response({"details": "Unable to remove item from wish list"})
+
+        wish_list.delete()
+        return Response({"details": "successfully removed item from wish list"})
+
+
+class WishListView(generics.ListAPIView):
+    serializer_class = ListWishListDetailSerializer
+    permission_classes = (AllowAny, )
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['product__title',
+                     'product__description', 'product__category__name']
+
+    def get_queryset(self):
+        try:
+            user = self.request.user
+            if user.is_anonymous:
+                user = None
+                if self.request.session.session_key is None:
+                    self.request.session.save()
+        except Exception as e:
+            print(e)
+            pass
+
+        filter_params = {}
+        if bool(user):
+            filter_params.update({
+                "user": user
+            })
+        else:
+            filter_params.update({
+                "session_id": self.request.session.session_key
+            })
+
+        wish_list = cart_models.WishList.objects.filter(
+            **filter_params).order_by('-date_created')
+        return wish_list

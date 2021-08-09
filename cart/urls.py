@@ -12,4 +12,9 @@ urlpatterns = [
     url(r'^list-order/$', views.ListOrderView.as_view(), name='list-order'),
     url(r'^update-order/$', views.UpdateOrderView.as_view(), name='update-order'),
 
+    url(r'^add-to-wish/$', views.AddToWishListView.as_view(), name='add-to-wish'),
+    url(r'^remove-from-wish/$', views.RemoveFromWishListView.as_view(),
+        name='remove-from-wish'),
+    url(r'^list-wish-list/$', views.WishListView.as_view(), name='list-wish-list'),
+
 ]
