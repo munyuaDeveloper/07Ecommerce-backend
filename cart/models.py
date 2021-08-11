@@ -64,11 +64,15 @@ class OrderInfo(models.Model):
     """
          order information 
     """
-    ORDER_STATUS = (
+    PAYMENT_STATUS = (
         ("TRADE_SUCCESS", "success"),
         ("TRADE_CLOSED", "Timeout off"),
         ("WAIT_BUYER_PAY", "Transaction creation"),
         ("TRADE_FINISHED", "End of transaction"),
+    )
+    ORDER_STATUS = (
+        ("ONGOING", "ONGOING"),
+        ("COMPLETE", "COMPLETE")
     )
 
     cart = models.ForeignKey(ShoppingCart, verbose_name="cart",
@@ -76,7 +80,9 @@ class OrderInfo(models.Model):
     order_reference = models.CharField(
         max_length=30, null=True, blank=True, unique=True, verbose_name="order number")
     payment_status = models.CharField(
-        choices=ORDER_STATUS, max_length=30, verbose_name="Order Status")
+        choices=PAYMENT_STATUS, max_length=30, verbose_name="Payment Status")
+    order_status = models.CharField(
+        choices=ORDER_STATUS, max_length=30, blank=True, verbose_name="Order Status")
     order_mount = models.FloatField(default=0.0, verbose_name="order amount")
 
     # User Info

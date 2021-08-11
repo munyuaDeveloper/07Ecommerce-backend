@@ -237,6 +237,7 @@ class CreateOrderView(generics.CreateAPIView):
         order_params = {
             "cart": cart_inst,
             "payment_status": "WAIT_BUYER_PAY",
+            "order_status": "ONGOING",
             "pickup_location": location,
             "phone_number": phone_number,
             "email": email,
@@ -319,6 +320,7 @@ class UpdateOrderView(generics.UpdateAPIView):
             return Response({"details": "Order is already completed"})
 
         order_queryset.payment_status = "TRADE_CLOSED"
+        order_queryset.order_status = "COMPLETE"
         order_queryset.save(update_fields=['payment_status'])
 
         cart = order_queryset.cart
