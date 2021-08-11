@@ -80,21 +80,22 @@ class OrderInfo(models.Model):
     order_reference = models.CharField(
         max_length=30, null=True, blank=True, unique=True, verbose_name="order number")
     payment_status = models.CharField(
-        choices=PAYMENT_STATUS, max_length=30, verbose_name="Payment Status")
+        choices=PAYMENT_STATUS, max_length=30, null=True, blank=True, verbose_name="Payment Status")
     order_status = models.CharField(
         choices=ORDER_STATUS, max_length=30, blank=True, verbose_name="Order Status")
-    order_mount = models.FloatField(default=0.0, verbose_name="order amount")
+    order_mount = models.FloatField(
+        default=0.0, null=True, blank=True, verbose_name="order amount")
 
     # User Info
-    pickup_location = models.CharField(max_length=100, null=True)
-    phone_number = models.CharField(max_length=15, null=True)
-    email = models.CharField(max_length=255, null=True)
-    email = models.CharField(max_length=255, null=True)
-    method_of_payment = models.CharField(max_length=255, null=True)
-    card_owner = models.CharField(max_length=255, null=True)
-    card_number = models.CharField(max_length=255, null=True)
-    card_cvc = models.CharField(max_length=255, null=True)
-    date_created = models.DateTimeField(auto_now_add=True, null=True)
+    pickup_location = models.CharField(max_length=100, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    method_of_payment = models.CharField(max_length=255, blank=True, null=True)
+    card_owner = models.CharField(max_length=255, blank=True, null=True)
+    card_number = models.CharField(max_length=255, blank=True, null=True)
+    card_cvc = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(
+        auto_now_add=True, blank=True, null=True)
 
     class Meta:
         verbose_name = u"order"
