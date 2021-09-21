@@ -190,8 +190,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SERVICE_URLS = {
     # "shared_service": "https://ecommerce-apis.herokuapp.com/"
-    "shared_service": "http://15.206.136.58/"
+    # "shared_service": "http://15.206.136.58/"
     # "shared_service": "http://localhost:8000/"
+    "shared_service": "http://172.26.8.246/"
 }
 
 # django_heroku.settings(locals())
