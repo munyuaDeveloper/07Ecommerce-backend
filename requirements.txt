@@ -32,4 +32,6 @@ toml==0.10.2
 uritemplate==3.0.1
 urllib3==1.26.4
 whitenoise==5.2.0
+boto3==1.18.45
+django-storages==1.11.1
 psycopg2-binary==2.8.6
