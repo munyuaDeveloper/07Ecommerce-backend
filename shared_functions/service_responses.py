@@ -17,5 +17,6 @@ class ServiceResponseManager:
             if response.status_code == 200:
                 data = response.json()
                 return data['results']
-        except:
+        except Exception as e:
+            print(e)
             return []
