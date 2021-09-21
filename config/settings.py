@@ -190,8 +190,8 @@ MEDIA_URL = '/media/'
 
 
 SERVICE_URLS = {
-    "shared_service": "https://ecommerce-apis.herokuapp.com/"
-    # "shared_service": "http://localhost:1400/"
+    # "shared_service": "https://ecommerce-apis.herokuapp.com/"
+    "shared_service": "http://52.66.197.147/"
 }
 
 django_heroku.settings(locals())
